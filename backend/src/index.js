@@ -15,7 +15,6 @@ app.use(cors({
   methods: ["GET", "POST"]
 }));
 
-
 let mongoConnected = false;
 
 // Route racine
@@ -36,14 +35,22 @@ mongoose.connect(MONGO_URI)
   .then(async () => {
     console.log("MongoDB connecté ✅");
     mongoConnected = true;
-    await verifySMTP();
+
+    // SMTP optionnel, erreur catchée
+    try {
+      await verifySMTP();
+      console.log("SMTP ready ✅");
+    } catch (err) {
+      console.warn("SMTP échoué (ignorable pour dev) :", err.message);
+    }
+
   })
   .catch(err => {
     console.error("⚠️ Impossible de se connecter à MongoDB :", err.message);
     console.warn("Le serveur continue quand même.");
   });
 
-
+// Serveur
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur le port ${PORT} 🚀`);
