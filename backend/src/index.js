@@ -10,9 +10,25 @@ const app = express();
 const MONGO_URI = process.env.MONGO_URI;
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: ["https://pixel-perfect-portfolios-olive.vercel.app"],
+  methods: ["GET", "POST"]
+}));
+
 
 let mongoConnected = false;
+
+// Route racine
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "Backend is running 🚀",
+    mongoConnected
+  });
+});
+
+// Route contact
+app.use("/api/contact", contactRoute);
 
 // Connexion MongoDB
 mongoose.connect(MONGO_URI)
@@ -23,22 +39,9 @@ mongoose.connect(MONGO_URI)
   })
   .catch(err => {
     console.error("⚠️ Impossible de se connecter à MongoDB :", err.message);
-    console.warn("Le serveur continue quand même. MongoDB est optionnel pour l'instant.");
+    console.warn("Le serveur continue quand même.");
   });
 
-
-// Route racine (health check)
-app.get("/", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    message: "Backend is running 🚀",
-    mongoConnected
-  });
-});
-
-
-// Route contact
-app.use("/api/contact", contactRoute);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
