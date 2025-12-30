@@ -26,10 +26,21 @@ mongoose.connect(MONGO_URI)
     console.warn("Le serveur continue quand même. MongoDB est optionnel pour l'instant.");
   });
 
+
+// Route racine (health check)
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "Backend is running 🚀",
+    mongoConnected
+  });
+});
+
+
 // Route contact
 app.use("/api/contact", contactRoute);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Serveur démarré sur http://localhost:${PORT} 🚀`);
+  console.log(`Serveur démarré sur le port ${PORT} 🚀`);
 });
