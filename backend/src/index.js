@@ -31,6 +31,7 @@ app.get("/", (req, res) => {
 app.use("/api/contact", contactRoute);
 
 // Connexion MongoDB
+console.log("Railway MONGO_URI =", process.env.MONGO_URI);
 mongoose.connect(MONGO_URI)
   .then(async () => {
     console.log("MongoDB connecté ✅");
