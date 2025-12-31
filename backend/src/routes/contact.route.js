@@ -1,6 +1,6 @@
 import express from "express";
 import Message from "../models/Message.model.js";
-import { transporter } from "../config/mailer.js";
+import { sendEmail } from "../config/mailer.js";
 import mongoose from "mongoose";
 
 const router = express.Router();
@@ -28,16 +28,18 @@ router.post("/", async (req, res) => {
       console.warn("⚠️ MongoDB non connecté : message non sauvegardé en DB");
     }
 
-    // Envoi email
-    await transporter.sendMail({
-      from: `"Portfolio" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER,
-      subject: `Nouveau message de ${name}`,
-      text: `Nom: ${name}\nEmail: ${email}\nMessage: ${message}`
+  // Envoi d'Email avec Resend en production
+    await sendEmail({
+    subject: "📩 Nouveau message portfolio",
+    text: `
+      Nom: ${name}
+      Email: ${email}
+  
+      Message:
+      ${message}
+        `,
     });
-
-    console.log("Email envoyé ✅");
-
+    console.log("Email envoyé via Resend ✅");
     res.status(200).json({
       success: true,
       message: newMessage
@@ -46,10 +48,9 @@ router.post("/", async (req, res) => {
       data: newMessage
     });
 
-  } catch (error) {
-    console.error("Erreur route /api/contact :", error);
-    res.status(500).json({ success: false, message: "Erreur serveur, impossible d’envoyer le message" });
-  }
+  } catch (err) {
+    console.error("Erreur lors de l'envoi du message:", err.message);
+    return res.status(500).json({ success: false, message: "Erreur lors de l'envoi du message" });
+    }
 });
-
-export default router;
+export default router

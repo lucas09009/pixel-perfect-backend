@@ -1,25 +1,14 @@
-// src/config/mailer.js
-import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-
+import { Resend } from "resend";
 dotenv.config();
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-export const transporter = nodemailer.createTransport({
-  service: "gmail",
-  port: 587,          // au lieu de 465
-  secure: false, 
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
-
-// Fonction optionnelle pour tester le SMTP
-export async function verifySMTP() {
-  try {
-    await transporter.verify();
-    console.log("SMTP Gmail prêt ✅");
-  } catch (err) {
-    console.error("Erreur SMTP :", err);
-  }
+// EMAIL EN PRODUCTION AVEC RESEND
+export async function sendEmail({ subject, text }) {
+  return await resend.emails.send({
+    from: "Portfolio <onboarding@resend.dev>",
+    to: ["luckpegan@gmail.com"],
+    subject,
+    text,
+  });
 }

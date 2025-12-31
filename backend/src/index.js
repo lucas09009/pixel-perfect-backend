@@ -3,11 +3,25 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import contactRoute from "./routes/contact.route.js";
-import { verifySMTP } from "./config/mailer.js";
+import { Resend } from "resend";
 
 dotenv.config();
 const app = express();
 const MONGO_URI = process.env.MONGO_URI;
+
+
+  // Initialisation Resend
+  let emailReady = false;
+  let resendClient;
+  if (process.env.RESEND_API_KEY) {
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+    console.log("✅ Clé Resend trouvée, système d'email prêt à tester");
+    // emailReady = true;
+    console.log("emailReady:", !emailReady);
+  } else {
+    console.warn("⚠️ RESEND_API_KEY manquant, le système d'email ne fonctionnera pas");
+  }
+
 
 app.use(express.json());
 app.use(cors({
@@ -16,7 +30,6 @@ app.use(cors({
 }));
 
 let mongoConnected = false;
-let smtpReady = false;
 // Route racine
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -29,26 +42,15 @@ app.get("/", (req, res) => {
 // Route contact
 app.use("/api/contact", contactRoute);
 
-// Connexion MongoDB
-console.log("Railway MONGO_URI =", process.env.MONGO_URI);
+
+// MongoDB (optionnel)
 mongoose.connect(MONGO_URI)
-  .then(async () => {
+  .then(() => {
     console.log("MongoDB connecté ✅");
     mongoConnected = true;
-
-    // SMTP optionnel, erreur catchée
-    try {
-      await verifySMTP();
-      smtpReady = true;
-      console.log("SMTP ready ✅");
-    } catch (err) {
-      console.warn("SMTP échoué (ignorable pour dev) :", err.message);
-    }
-
   })
   .catch(err => {
-    console.error("⚠️ Impossible de se connecter à MongoDB :", err.message);
-    console.warn("Le serveur continue quand même.");
+    console.warn("MongoDB indisponible :", err.message);
   });
 
 // Serveur
