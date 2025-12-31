@@ -16,7 +16,7 @@ app.use(cors({
 }));
 
 let mongoConnected = false;
-
+let smtpReady = false;
 // Route racine
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -39,6 +39,7 @@ mongoose.connect(MONGO_URI)
     // SMTP optionnel, erreur catchée
     try {
       await verifySMTP();
+      smtpReady = true;
       console.log("SMTP ready ✅");
     } catch (err) {
       console.warn("SMTP échoué (ignorable pour dev) :", err.message);
