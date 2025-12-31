@@ -6,28 +6,30 @@ import contactRoute from "./routes/contact.route.js";
 import { Resend } from "resend";
 
 dotenv.config();
-const app = express();
 const MONGO_URI = process.env.MONGO_URI;
-
-
-  // Initialisation Resend
-  let emailReady = false;
-  let resendClient;
-  if (process.env.RESEND_API_KEY) {
-    resendClient = new Resend(process.env.RESEND_API_KEY);
-    console.log("✅ Clé Resend trouvée, système d'email prêt à tester");
-    // emailReady = true;
-    console.log("emailReady:", !emailReady);
-  } else {
-    console.warn("⚠️ RESEND_API_KEY manquant, le système d'email ne fonctionnera pas");
-  }
-
+const app = express();
 
 app.use(express.json());
 app.use(cors({
-  origin: ["https://pixel-perfect-portfolios-olive.vercel.app"],
-  methods: ["GET", "POST"]
+  origin: [
+    "http://localhost:8080", "https://pixel-perfect-portfolios-olive.vercel.app", ],
+  methods: ["GET", "POST", "OPTIONS"],
+  credentials: true, 
 }));
+
+
+// Initialisation Resend
+let emailReady = false;
+let resendClient;
+if (process.env.RESEND_API_KEY) {
+  resendClient = new Resend(process.env.RESEND_API_KEY);
+  console.log("✅ Clé Resend trouvée, système d'email prêt à tester");
+  // emailReady = true;
+  console.log("emailReady:", !emailReady);
+} else {
+  console.warn("⚠️ RESEND_API_KEY manquant, le système d'email ne fonctionnera pas");
+}
+
 
 let mongoConnected = false;
 // Route racine
